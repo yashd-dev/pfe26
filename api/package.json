@@ -26,10 +26,8 @@
     "db:migrate": "bun run --filter @api/db db:migrate",
     "db:seed": "bun run --filter @api/db db:seed",
     "db:local": "bun run --filter @api/db db:local",
-    "docker:build": "docker compose build",
-    "docker:up": "docker compose up -d --build",
-    "docker:down": "docker compose down",
-    "docker:logs": "docker compose logs -f",
+    "docker:build": "docker build -t api .",
+    "docker:run": "docker run --rm -p 3000:3000 --env-file apps/server/.env api",
     "env:generate": "varlock codegen --path ./apps/server/ && varlock codegen --path ./packages/db/",
     "postinstall": "varlock codegen --path ./apps/server/ && varlock codegen --path ./packages/db/"
   },
