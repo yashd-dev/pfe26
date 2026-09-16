@@ -1,41 +1,31 @@
 ---
-import Layout from '../../layouts/Layout.astro';
-import { getMenuItem, listMenuItems, type MenuItem } from '../../lib/menu-api';
+import Layout from "../../layouts/Layout.astro";
 
 export async function getStaticPaths() {
-  try {
-    const items = await listMenuItems();
+  const response = await fetch("https://pfe26-production.up.railway.app/menu");
+  const items = await response.json();
 
-    return items.map((item) => ({
-      params: { slug: item.slug },
-      props: { item },
-    }));
-  } catch {
-    return [];
-  }
+  return items.map((item) => ({
+    params: { slug: item.slug },
+    props: { item },
+  }));
 }
 
-const slug = Astro.params.slug;
-let item = Astro.props.item as MenuItem | undefined;
-
-if (!item && slug) {
-  try {
-    item = await getMenuItem(slug);
-  } catch {
-    return Astro.redirect('/');
-  }
-}
-
-if (!item) return Astro.redirect('/');
+const item = Astro.props.item;
+if (!item) return Astro.redirect("/");
 ---
 
-<Layout pageTitle={`${item.name} | NMIMS Canteen`} backHref="/" showSearch={false}>
+<Layout
+  pageTitle={`${item.name} | NMIMS Canteen`}
+  backHref="/"
+  showSearch={false}
+>
   <article class="detail-card">
     <img src={item.image} alt={item.name} />
     <div class="detail-body">
       <span class="pill">{item.cuisine}</span>
       <h1>{item.name}</h1>
-      <p class="muted">{item.tags.join(' / ')}</p>
+      <p class="muted">{item.tags.join(" / ")}</p>
 
       <div class="stats" aria-label="Item details">
         <div class="stat">
@@ -43,8 +33,8 @@ if (!item) return Astro.redirect('/');
           <span>Cook time</span>
         </div>
         <div class="stat">
-          <strong>{item.rating}</strong>
-          <span>{item.reviewCount} reviews</span>
+          <strong id="item-rating">{item.rating}</strong>
+          <span><span id="review-count">{item.reviewCount}</span> reviews</span>
         </div>
         <div class="stat">
           <strong>{item.caloriesPerServing}</strong>
@@ -52,10 +42,80 @@ if (!item) return Astro.redirect('/');
         </div>
       </div>
 
+      <form class="review-form" id="review-form" data-item-id={item.id}>
+        <label for="rating">Rate this item</label>
+        <div class="review-row">
+          <select id="rating" name="rating" required>
+            <option value="">Choose</option>
+            <option value="5">5 stars</option>
+            <option value="4">4 stars</option>
+            <option value="3">3 stars</option>
+            <option value="2">2 stars</option>
+            <option value="1">1 star</option>
+          </select>
+          <button type="submit">Submit</button>
+        </div>
+        <p class="review-message" id="review-message"></p>
+      </form>
+
       <h2 class="section-title">Ingredients</h2>
       <ul class="ingredients">
-        {item.ingredients.map((ingredient) => <li>{ingredient}</li>)}
+        {item.ingredients.map((ingredient: unknown) => <li>{ingredient}</li>)}
       </ul>
     </div>
   </article>
+
+  <script>
+    const form = document.querySelector("#review-form");
+    const message = document.querySelector("#review-message");
+    const ratingText = document.querySelector("#item-rating");
+    const reviewCountText = document.querySelector("#review-count");
+    const itemId = form.dataset.itemId;
+
+    function showRating(result) {
+      ratingText.textContent = result.averageRating;
+      reviewCountText.textContent = result.reviewCount;
+    }
+
+    async function loadLatestRating() {
+      const response = await fetch(
+        `https://pfe26-production.up.railway.app/menu/${itemId}/reviews`,
+      );
+
+      if (response.ok) {
+        const result = await response.json();
+        showRating(result);
+      }
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const rating = Number(new FormData(form).get("rating"));
+
+      message.textContent = "Submitting...";
+
+      try {
+        const response = await fetch(
+          `https://pfe26-production.up.railway.app/menu/${itemId}/reviews`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ rating }),
+          },
+        );
+
+        if (!response.ok) throw new Error("Review failed");
+
+        const result = await response.json();
+        showRating(result);
+        message.textContent = "Thanks for your review!";
+        form.reset();
+      } catch {
+        message.textContent = "Could not submit review. Try again.";
+      }
+    });
+
+    loadLatestRating();
+  </script>
 </Layout>

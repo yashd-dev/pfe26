@@ -14,7 +14,7 @@
 }
 
 html {
-  font-family: 'Manrope', system-ui, sans-serif;
+  font-family: "Manrope", system-ui, sans-serif;
   background: var(--bg);
   color: var(--text);
 }
@@ -48,7 +48,11 @@ img {
 .shell {
   width: min(100%, 42rem);
   margin: 0 auto;
-  padding: 18px 14px 32px;
+  padding: 132px 14px 32px;
+}
+
+.shell-detail {
+  padding-top: 78px;
 }
 
 .topbar {
@@ -60,7 +64,14 @@ img {
 }
 
 .site-header {
-  margin-bottom: 14px;
+  position: fixed;
+  top: 0;
+  left: 50%;
+  z-index: 10;
+  width: min(100%, 42rem);
+  padding: 18px 14px 0;
+  background: var(--bg);
+  transform: translateX(-50%);
 }
 
 .back-link {
@@ -155,7 +166,9 @@ img {
   background: var(--surface);
   object-fit: cover;
   padding: 4px;
-  transition: border-color 120ms ease, box-shadow 120ms ease;
+  transition:
+    border-color 120ms ease,
+    box-shadow 120ms ease;
 }
 
 .cuisine.active {
@@ -165,7 +178,9 @@ img {
 .cuisine.active .cuisine-image {
   border-color: var(--accent);
   background: var(--accent-soft);
-  box-shadow: 0 0 0 3px var(--accent-soft), 0 0 0 4px var(--accent);
+  box-shadow:
+    0 0 0 3px var(--accent-soft),
+    0 0 0 4px var(--accent);
 }
 
 .section-title {
@@ -299,6 +314,47 @@ img {
   font-size: 11px;
 }
 
+.review-form {
+  margin: 14px 0;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 12px;
+}
+
+.review-form label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 800;
+}
+
+.review-row {
+  display: flex;
+  gap: 8px;
+}
+
+.review-row select {
+  flex: 1;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  padding: 0 12px;
+}
+
+.review-row button {
+  border: 0;
+  border-radius: 999px;
+  background: var(--text);
+  color: var(--surface);
+  padding: 10px 14px;
+  cursor: pointer;
+}
+
+.review-message {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+}
+
 .ingredients {
   margin: 10px 0 0;
   padding-left: 18px;
@@ -310,7 +366,11 @@ img {
 
 @media (min-width: 560px) {
   .shell {
-    padding-top: 28px;
+    padding-top: 142px;
+  }
+
+  .shell-detail {
+    padding-top: 88px;
   }
 
   .product-grid {

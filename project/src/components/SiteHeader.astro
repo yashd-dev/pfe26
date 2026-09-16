@@ -5,31 +5,41 @@ type Props = {
   title?: string;
 };
 
-const { backHref, showSearch = true, title = 'NMIMS Canteen' } = Astro.props;
+const { backHref, showSearch = true, title = "NMIMS Canteen" } = Astro.props;
 ---
 
 <header class="site-header">
   <div class="topbar">
-    {backHref && (
-      <a class="back-link" href={backHref} aria-label="Back">
-        <span class="material-symbols-rounded" aria-hidden="true">arrow_back</span>
-      </a>
-    )}
+    {
+      backHref && (
+        <a class="back-link" href={backHref} aria-label="Back">
+          <span class="material-symbols-rounded" aria-hidden="true">
+            arrow_back
+          </span>
+        </a>
+      )
+    }
     <p class="title">{title}</p>
   </div>
 
-  {showSearch && (
-    <form class="search-form" method="get" action="/">
-      <span class="material-symbols-rounded search-icon" aria-hidden="true">search</span>
-      <input
-        class="search-input"
-        id="search-input"
-        type="search"
-        name="search"
-        placeholder="Search food..."
-        aria-label="Search menu items"
-      />
-      <button class="search-button" type="submit">Search</button>
-    </form>
-  )}
+  {
+    showSearch && (
+      <form class="search-form" method="get" action="/">
+        <span class="material-symbols-rounded search-icon" aria-hidden="true">
+          search
+        </span>
+        <input
+          class="search-input"
+          id="search-input"
+          type="search"
+          name="search"
+          placeholder="Search food..."
+          aria-label="Search menu items"
+        />
+        <button class="search-button" type="submit">
+          Search
+        </button>
+      </form>
+    )
+  }
 </header>
