@@ -10,7 +10,7 @@ const db = getDb();
 new Elysia()
   .use(
     cors({
-      origin: env.CORS_ORIGIN,
+      origin: true,
       methods: ["GET", "POST", "OPTIONS"],
     }),
   )
