@@ -1,4 +1,4 @@
-const API_BASE_URL = (import.meta.env.API_BASE_URL ?? import.meta.env.PUBLIC_API_BASE_URL ?? 'http://localhost:3000').replace(/\/$/, '');
+const API_BASE_URL = (import.meta.env.API_BASE_URL ?? import.meta.env.PUBLIC_API_BASE_URL ?? 'https://pfe26-production.up.railway.app').replace(/\/$/, '');
 
 export type MenuItem = {
   id: number;

@@ -1,7 +1,6 @@
 import { cors } from "@elysiajs/cors";
 import { Elysia } from "elysia";
 
-import { env } from "./env.server";
 import { menuRoutes } from "./routes/menu";
 import { getDb } from "./services";
 
