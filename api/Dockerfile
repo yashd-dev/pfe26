@@ -2,7 +2,7 @@ FROM oven/bun:1 AS builder
 WORKDIR /app
 
 COPY . .
-RUN --mount=type=cache,target=/root/.bun/install/cache bun install --frozen-lockfile
+RUN --mount=type=cache,id=bun-install-cache,target=/root/.bun/install/cache bun install --frozen-lockfile
 
 ENV NODE_ENV=production
 RUN bun run --filter server build
