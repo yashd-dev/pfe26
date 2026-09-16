@@ -1,0 +1,61 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getMenuItem, listMenuItems, type MenuItem } from '../../lib/menu-api';
+
+export async function getStaticPaths() {
+  try {
+    const items = await listMenuItems();
+
+    return items.map((item) => ({
+      params: { slug: item.slug },
+      props: { item },
+    }));
+  } catch {
+    return [];
+  }
+}
+
+const slug = Astro.params.slug;
+let item = Astro.props.item as MenuItem | undefined;
+
+if (!item && slug) {
+  try {
+    item = await getMenuItem(slug);
+  } catch {
+    return Astro.redirect('/');
+  }
+}
+
+if (!item) return Astro.redirect('/');
+---
+
+<Layout pageTitle={`${item.name} | NMIMS Canteen`} backHref="/" showSearch={false}>
+  <article class="detail-card">
+    <img src={item.image} alt={item.name} />
+    <div class="detail-body">
+      <span class="pill">{item.cuisine}</span>
+      <h1>{item.name}</h1>
+      <p class="muted">{item.tags.join(' / ')}</p>
+
+      <div class="stats" aria-label="Item details">
+        <div class="stat">
+          <strong>{item.cookTimeMinutes}m</strong>
+          <span>Cook time</span>
+        </div>
+        <div class="stat">
+          <strong>{item.rating}</strong>
+          <span>{item.reviewCount} reviews</span>
+        </div>
+        <div class="stat">
+          <strong>{item.caloriesPerServing}</strong>
+          <span>Calories</span>
+        </div>
+      </div>
+
+      <h2 class="section-title">Ingredients</h2>
+      <ul class="ingredients">
+        {item.ingredients.map((ingredient) => <li>{ingredient}</li>)}
+      </ul>
+    </div>
+  </article>
+</Layout>

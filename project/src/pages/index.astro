@@ -1,0 +1,167 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { listCuisines, listMenuItems } from '../lib/menu-api';
+
+const [cuisinesResult, itemsResult] = await Promise.allSettled([
+  listCuisines(),
+  listMenuItems(),
+]);
+
+const cuisines = cuisinesResult.status === 'fulfilled' ? cuisinesResult.value : [];
+const items = itemsResult.status === 'fulfilled' ? itemsResult.value : [];
+const menuData = JSON.stringify({ cuisines, items }).replace(/</g, '\\u003c');
+---
+
+<Layout pageTitle="NMIMS Canteen">
+  <nav class="cuisines" aria-label="Cuisine filters">
+    <a class="cuisine active" href="/" data-cuisine="">
+      <span class="cuisine-image" aria-hidden="true"></span>
+      <span>All</span>
+    </a>
+    {cuisines.map((item) => {
+      const params = new URLSearchParams();
+      params.set('cuisine', item.slug);
+
+      return (
+        <a class="cuisine" href={`/?${params.toString()}`} data-cuisine={item.slug}>
+          <img class="cuisine-image" src={item.coverImage} alt="" loading="lazy" />
+          <span>{item.name}</span>
+        </a>
+      );
+    })}
+  </nav>
+
+  <section aria-labelledby="items-heading">
+    <div class="section-title">
+      <h2 id="items-heading">Fresh Items</h2>
+      <span id="item-count">{items.length} items</span>
+    </div>
+
+    <div class="product-grid" id="product-grid" hidden={items.length === 0}>
+      {items.map((item) => (
+        <a class="product-card" href={`/menu/${item.slug}`}>
+          <img src={item.image} alt={item.name} loading="lazy" />
+          <div class="product-body">
+            <span class="pill">{item.cuisine}</span>
+            <h3 class="product-name">{item.name}</h3>
+            <p class="product-meta">
+              <span>{item.cookTimeMinutes} min</span>
+              <span>{item.caloriesPerServing} cal</span>
+              <span>{item.rating} rating</span>
+            </p>
+          </div>
+        </a>
+      ))}
+    </div>
+    <p class="empty" id="empty-state" hidden={items.length > 0}>No items found. Check the API server or try another search.</p>
+  </section>
+
+  <script id="menu-data" type="application/json" set:html={menuData}></script>
+  <script>
+    const dataElement = document.querySelector('#menu-data');
+    const form = document.querySelector('.search-form');
+    const input = document.querySelector('#search-input');
+    const grid = document.querySelector('#product-grid');
+    const empty = document.querySelector('#empty-state');
+    const count = document.querySelector('#item-count');
+    const heading = document.querySelector('#items-heading');
+    const cuisineLinks = Array.from(document.querySelectorAll('[data-cuisine]'));
+    const { cuisines, items } = JSON.parse(dataElement.textContent);
+    let activeCuisine = '';
+
+    function createProductCard(item) {
+      const card = document.createElement('a');
+      card.className = 'product-card';
+      card.href = `/menu/${item.slug}`;
+
+      const image = document.createElement('img');
+      image.src = item.image;
+      image.alt = item.name;
+      image.loading = 'lazy';
+
+      const body = document.createElement('div');
+      body.className = 'product-body';
+
+      const pill = document.createElement('span');
+      pill.className = 'pill';
+      pill.textContent = item.cuisine;
+
+      const name = document.createElement('h3');
+      name.className = 'product-name';
+      name.textContent = item.name;
+
+      const meta = document.createElement('p');
+      meta.className = 'product-meta';
+      for (const value of [`${item.cookTimeMinutes} min`, `${item.caloriesPerServing} cal`, `${item.rating} rating`]) {
+        const span = document.createElement('span');
+        span.textContent = value;
+        meta.append(span);
+      }
+
+      body.append(pill, name, meta);
+      card.append(image, body);
+      return card;
+    }
+
+    function updateUrl(search) {
+      const params = new URLSearchParams();
+
+      if (activeCuisine) params.set('cuisine', activeCuisine);
+      if (search) params.set('search', search);
+
+      window.history.replaceState(null, '', params.toString() ? `/?${params}` : '/');
+    }
+
+    function render() {
+      const search = input.value.trim().toLowerCase();
+      const activeCuisineName = cuisines.find((item) => item.slug === activeCuisine)?.name;
+      const filteredItems = items.filter((item) => {
+        const matchesCuisine = !activeCuisine || item.cuisine.toLowerCase() === activeCuisine;
+        const matchesSearch = !search || [item.name, item.cuisine, ...item.tags, ...item.ingredients]
+          .join(' ')
+          .toLowerCase()
+          .includes(search);
+
+        return matchesCuisine && matchesSearch;
+      });
+
+      for (const link of cuisineLinks) {
+        link.classList.toggle('active', link.dataset.cuisine === activeCuisine);
+      }
+
+      document.querySelector('.cuisine.active')?.scrollIntoView({ block: 'nearest', inline: 'center' });
+
+      heading.textContent = activeCuisineName ? `${activeCuisineName} Items` : 'Fresh Items';
+      count.textContent = `${filteredItems.length} items`;
+      grid.replaceChildren(...filteredItems.map(createProductCard));
+      grid.hidden = filteredItems.length === 0;
+      empty.hidden = filteredItems.length > 0;
+      updateUrl(search);
+    }
+
+    function readUrlState() {
+      const params = new URLSearchParams(window.location.search);
+
+      activeCuisine = params.get('cuisine') ?? '';
+      input.value = params.get('search') ?? '';
+    }
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      render();
+    });
+
+    input.addEventListener('input', render);
+
+    for (const link of cuisineLinks) {
+      link.addEventListener('click', (event) => {
+        event.preventDefault();
+        activeCuisine = link.dataset.cuisine ?? '';
+        render();
+      });
+    }
+
+    readUrlState();
+    render();
+  </script>
+</Layout>
