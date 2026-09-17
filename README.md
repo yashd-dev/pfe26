@@ -5,7 +5,7 @@ Workshop project repository for the NMIMS canteen app.
 ## Live URLs
 
 - Project: https://pfe-web.yashd.in/
-- Backend API: https://pfe26-production.up.railway.app/
+- Backend API: https://pfe-api.yashd.in/
 
 ## Repository Structure
 
