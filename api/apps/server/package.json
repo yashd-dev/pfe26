@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@api/db": "workspace:*",
+    "@elysia/openapi": "^1.4.16",
     "@elysiajs/cors": "^1.4.2",
     "@sinclair/typebox": "^0.34.52",
     "elysia": "^1.4.30",

@@ -11,7 +11,12 @@ import {
 import { Elysia, t } from "elysia";
 
 export function menuRoutes(db: Database) {
-  return new Elysia({ prefix: "/menu" })
+  return new Elysia({
+    prefix: "/menu",
+    detail: {
+      tags: ["Menu"],
+    },
+  })
     .get("/", ({ query }) => listMenuItems(db, query.search), {
       query: t.Object({
         search: t.Optional(t.String()),
