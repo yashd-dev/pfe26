@@ -1,0 +1,15 @@
+body {
+  display: flex;
+  gap: 30px;
+
+}
+
+.heading {
+  font-size: 20px;
+  color: blue;
+  margin-left: 10px !important;
+}
+#division1 {
+  margin-left: 30px;
+  margin-top: 50px;
+}
